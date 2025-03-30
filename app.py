@@ -510,5 +510,13 @@ def save_credentials():
     flash('Credentials saved successfully', 'success')
     return redirect(url_for('index'))
 
+# Add these lines at the end of your app.py file
+
+# Update this section at the bottom of your app.py file:
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Get port from environment variable or use 5000 as default
+    port = int(os.environ.get('PORT', 5000))
+    # In production, bind to 0.0.0.0 to accept connections from any IP
+    host = '0.0.0.0' if os.environ.get('PRODUCTION') else '127.0.0.1'
+    # Start the app
+    app.run(host=host, port=port, debug=os.environ.get('DEBUG', 'False').lower() == 'true')
