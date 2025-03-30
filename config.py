@@ -5,46 +5,42 @@ from dotenv import load_dotenv
 # Get the absolute path of the directory containing this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Specify the exact path to your .env file
+# Load the .env file if it exists locally
 env_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
 
-# Load the .env file with explicit path
-load_dotenv(dotenv_path=env_path)
-
-# Print debug info
-print(f"Loading .env from: {env_path}")
-print(f"LinkedIn Email from env: {os.getenv('LINKEDIN_EMAIL', 'Not found')}")
-
-# Application directories
-DATA_DIR = os.path.join(BASE_DIR, 'data')
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+# Application directories - adjust for production
+if os.environ.get('RENDER') or os.environ.get('PRODUCTION'):
+    # In production environments like Render, use temporary directories
+    DATA_DIR = '/tmp/data'
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    # Local development paths
+    DATA_DIR = os.path.join(BASE_DIR, 'data')
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 
 # Ensure directories exist
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Secret key for Flask sessions
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default-dev-key-change-in-production')
+
 # API keys and credentials
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-api-key-here')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
-# LinkedIn credentials - try environment variables first, then fallbacks
-LINKEDIN_EMAIL = os.getenv('LINKEDIN_EMAIL')
-LINKEDIN_PASSWORD = os.getenv('LINKEDIN_PASSWORD')
-
-# More debug info for LinkedIn credentials
-print(f"LinkedIn Email in config: {LINKEDIN_EMAIL}")
-print(f"LinkedIn Password in config: {'*' * len(LINKEDIN_PASSWORD) if LINKEDIN_PASSWORD else 'Not set'}")
+# LinkedIn credentials
+LINKEDIN_EMAIL = os.environ.get('LINKEDIN_EMAIL', '')
+LINKEDIN_PASSWORD = os.environ.get('LINKEDIN_PASSWORD', '')
 
 # Model settings
-GPT_MODEL = os.getenv('GPT_MODEL', 'gpt-4')
-TEMPERATURE = float(os.getenv('TEMPERATURE', '0.7'))
-
-# LinkedIn API settings (for future implementation)
-LINKEDIN_CLIENT_ID = os.getenv('LINKEDIN_CLIENT_ID', '')
-LINKEDIN_CLIENT_SECRET = os.getenv('LINKEDIN_CLIENT_SECRET', '')
+GPT_MODEL = os.environ.get('GPT_MODEL', 'gpt-4')
+TEMPERATURE = float(os.environ.get('TEMPERATURE', '0.7'))
 
 # App settings
-DEFAULT_SEARCH_DELAY = int(os.getenv('DEFAULT_SEARCH_DELAY', '5'))
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEFAULT_SEARCH_DELAY = int(os.environ.get('DEFAULT_SEARCH_DELAY', '5'))
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # File handling
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc', 'txt', 'csv'}
