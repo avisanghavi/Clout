@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Define ICP and Personas</h4>
+    </div>
+    <div class="card-body">
+        <p>Review and refine the AI-generated Ideal Customer Profile and Personas.</p>
+        
+        <form action="{{ url_for('define_icp') }}" method="post">
+            <!-- ICP Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5>Ideal Customer Profile (ICP)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="industry" class="form-label">Target Industry</label>
+                        <input type="text" class="form-control" id="industry" name="industry" 
+                               value="{{ icp.industry }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="company_size" class="form-label">Company Size</label>
+                        <input type="text" class="form-control" id="company_size" name="company_size" 
+                               value="{{ icp.company_size }}" required>
+                        <div class="form-text">e.g., "50-1000 employees", "Mid-market", etc.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="geography" class="form-label">Geography</label>
+                        <input type="text" class="form-control" id="geography" name="geography" 
+                               value="{{ icp.geography }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="other_criteria" class="form-label">Other Criteria</label>
+                        <input type="text" class="form-control" id="other_criteria" name="other_criteria" 
+                               value="{{ icp.other_criteria|join(', ') }}">
+                        <div class="form-text">Comma-separated list of other targeting criteria</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Buyer Persona Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5>Buyer Persona (Decision Maker)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="buyer_title" class="form-label">Typical Title</label>
+                        <input type="text" class="form-control" id="buyer_title" name="buyer_title" 
+                               value="{{ buyer_persona.title }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="buyer_role" class="form-label">Role Description</label>
+                        <input type="text" class="form-control" id="buyer_role" name="buyer_role" 
+                               value="{{ buyer_persona.role }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="buyer_pain_points" class="form-label">Pain Points</label>
+                        <input type="text" class="form-control" id="buyer_pain_points" name="buyer_pain_points" 
+                               value="{{ buyer_persona.pain_points|join(', ') }}">
+                        <div class="form-text">Comma-separated list of challenges this persona faces</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="buyer_search_terms" class="form-label">LinkedIn Search Terms</label>
+                        <input type="text" class="form-control" id="buyer_search_terms" name="buyer_search_terms" 
+                               value="{{ buyer_persona.search_terms }}" required>
+                        <div class="form-text">Search terms to find this persona on LinkedIn (e.g., "VP Sales OR Sales Director OR Chief Revenue Officer")</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Persona Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5>User Persona (End User)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="user_title" class="form-label">Typical Title</label>
+                        <input type="text" class="form-control" id="user_title" name="user_title" 
+                               value="{{ user_persona.title }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="user_role" class="form-label">Role Description</label>
+                        <input type="text" class="form-control" id="user_role" name="user_role" 
+                               value="{{ user_persona.role }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="user_pain_points" class="form-label">Pain Points</label>
+                        <input type="text" class="form-control" id="user_pain_points" name="user_pain_points" 
+                               value="{{ user_persona.pain_points|join(', ') }}">
+                        <div class="form-text">Comma-separated list of challenges this persona faces</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="user_search_terms" class="form-label">LinkedIn Search Terms</label>
+                        <input type="text" class="form-control" id="user_search_terms" name="user_search_terms" 
+                               value="{{ user_persona.search_terms }}">
+                        <div class="form-text">Search terms to find this persona on LinkedIn (optional)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Save ICP & Personas</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

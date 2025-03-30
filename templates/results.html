@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="bi bi-list-check me-2"></i>Connection-Sorted Intelligent Lead List</h4>
+        <div>
+            <a href="{{ url_for('search_form') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-search me-1"></i> New Search
+            </a>
+            <a href="{{ url_for('trusted_network') }}" class="btn btn-primary">
+                <i class="bi bi-people me-1"></i> Manage TNL
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="info-box mb-4 p-4 rounded">
+            <div class="mb-3">
+                <h5 class="d-flex align-items-center text-primary mb-3">
+                    <i class="bi bi-info-circle-fill me-2"></i>Connection Legend
+                </h5>
+                <div class="d-flex flex-wrap gap-3 mb-3">
+                    <span class="connection-badge tnl-badge">
+                        <i class="bi bi-star-fill"></i> Trusted Network
+                    </span>
+                    <span class="connection-badge first-badge">
+                        <i class="bi bi-person-check-fill"></i> 1st Connection
+                    </span>
+                    <span class="connection-badge second-badge">
+                        <i class="bi bi-people-fill"></i> 2nd Connection
+                    </span>
+                    <span class="connection-badge cold-badge">
+                        <i class="bi bi-person-plus"></i> Cold (No Connection)
+                    </span>
+                </div>
+                <p class="text-muted mb-0">
+                    Results are sorted by connection warmth, prioritizing paths through your Trusted Network for higher response rates.
+                </p>
+            </div>
+        </div>
+        
+        {% if profiles %}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-fill me-1"></i> Found <span class="text-primary fw-bold">{{ profiles|length }}</span> matching profiles
+                </h5>
+                <div class="btn-group shadow-sm" role="group">
+                    <button type="button" class="btn btn-sm btn-light view-mode active" data-view="card">
+                        <i class="bi bi-grid-3x3-gap me-1"></i> Card View
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light view-mode" data-view="table">
+                        <i class="bi bi-list-ul me-1"></i> Table View
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Card View -->
+            <div id="card-view" class="row g-4">
+                {% for profile in profiles %}
+                <div class="col-md-6">
+                    <div class="card profile-card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex mb-3">
+                                <div class="profile-image me-3">
+                                    {% if profile.profile_image %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden" style="width: 64px; height: 64px;">
+                                        <img src="{{ profile.profile_image }}" alt="{{ profile.name }}" class="img-fluid w-100 h-100 object-fit-cover">
+                                    </div>
+                                    {% else %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                        <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ profile.name }}</h5>
+                                    <h6 class="card-subtitle text-muted">{{ profile.headline }}</h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-geo-alt me-1"></i> {{ profile.location }}
+                                    </p>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="connection-badge 
+                                          {% if profile.tnl_connection %}tnl-badge
+                                          {% elif profile.connection_level == '1st' %}first-badge
+                                          {% elif profile.connection_level == '2nd' %}second-badge
+                                          {% else %}cold-badge{% endif %}">
+                                        {% if profile.tnl_connection %}
+                                            <i class="bi bi-star-fill"></i> TNL
+                                        {% elif profile.connection_level == '1st' %}
+                                            <i class="bi bi-person-check-fill"></i> 1st
+                                        {% elif profile.connection_level == '2nd' %}
+                                            <i class="bi bi-people-fill"></i> 2nd
+                                        {% else %}
+                                            <i class="bi bi-person-plus"></i> Cold
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if profile.mutual_connections %}
+                                <div class="mb-3">
+                                    <h6 class="border-top pt-3 mb-2">
+                                        <i class="bi bi-diagram-3 me-1"></i> Connection Paths:
+                                    </h6>
+                                    {% for mutual in profile.mutual_connections %}
+                                        <div class="mutual-connection {% if mutual.in_tnl %}tnl{% endif %} mb-2 p-2 rounded">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    {% if mutual.in_tnl %}
+                                                        <i class="bi bi-star-fill text-success me-1"></i>
+                                                        <strong>{{ mutual.name }}</strong>
+                                                        <span class="text-muted">(Trusted)</span>
+                                                    {% else %}
+                                                        <i class="bi bi-person-fill me-1"></i>
+                                                        {{ mutual.name }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if mutual.in_tnl %}
+                                                    <span class="badge bg-success">Trust: {{ mutual.tnl_score }}/10</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="{{ url_for('message_form', profile_id=loop.index0) }}" class="btn btn-primary">
+                                    <i class="bi bi-chat-text me-1"></i> Generate Outreach
+                                </a>
+                                <a href="{{ profile.profile_url }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-linkedin me-1"></i> View on LinkedIn
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Table View (hidden by default) -->
+            <div id="table-view" class="table-responsive rounded shadow-sm" style="display: none;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3">Name</th>
+                            <th class="py-3">Title/Position</th>
+                            <th class="py-3">Location</th>
+                            <th class="py-3">Connection</th>
+                            <th class="py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in profiles %}
+                        <tr>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    {% if profile.profile_image %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden me-2" style="width: 40px; height: 40px;">
+                                        <img src="{{ profile.profile_image }}" alt="{{ profile.name }}" class="img-fluid w-100 h-100 object-fit-cover">
+                                    </div>
+                                    {% else %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-person-fill text-secondary"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="fw-bold">{{ profile.name }}</div>
+                                </div>
+                            </td>
+                            <td class="py-3">{{ profile.headline }}</td>
+                            <td class="py-3">
+                                <small><i class="bi bi-geo-alt me-1"></i> {{ profile.location }}</small>
+                            </td>
+                            <td class="py-3">
+                                <span class="connection-badge 
+                                      {% if profile.tnl_connection %}tnl-badge
+                                      {% elif profile.connection_level == '1st' %}first-badge
+                                      {% elif profile.connection_level == '2nd' %}second-badge
+                                      {% else %}cold-badge{% endif %}">
+                                    {% if profile.tnl_connection %}
+                                        <i class="bi bi-star-fill"></i> TNL
+                                    {% else %}
+                                        {{ profile.connection_level }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('message_form', profile_id=loop.index0) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-chat-text me-1"></i> Message
+                                    </a>
+                                    <a href="{{ profile.profile_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-linkedin"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+        <!-- No results found -->
+        {% else %}
+            <div class="alert alert-warning">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    </div>
+                    <div>
+                        <h5 class="alert-heading">No profiles found</h5>
+                        <p>Try adjusting your search terms to find more potential leads, or check your LinkedIn connection.</p>
+                        <a href="{{ url_for('search_form') }}" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i> Try a new search
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View toggle
+        const viewButtons = document.querySelectorAll('.view-mode');
+        viewButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                // Update button active state
+                viewButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('bg-primary');
+                    btn.classList.remove('text-white');
+                    btn.classList.add('btn-light');
+                });
+                this.classList.add('active');
+                this.classList.remove('btn-light');
+                this.classList.add('bg-primary');
+                this.classList.add('text-white');
+                
+                // Show/hide appropriate view
+                const viewType = this.getAttribute('data-view');
+                if (viewType === 'card') {
+                    document.getElementById('card-view').style.display = 'flex';
+                    document.getElementById('table-view').style.display = 'none';
+                } else {
+                    document.getElementById('card-view').style.display = 'none';
+                    document.getElementById('table-view').style.display = 'block';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

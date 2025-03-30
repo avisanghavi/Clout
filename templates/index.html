@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-upload me-2"></i>Upload Your Product/Service Description</h4>
+    </div>
+    <div class="card-body">
+        {% if product_uploaded %}
+            <div class="alert alert-success">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="bi bi-check-circle-fill fs-1"></i>
+                    </div>
+                    <div>
+                        <h5>Product Description Uploaded Successfully</h5>
+                        <p>Your product description has been uploaded and analyzed to generate your Ideal Customer Profile and Personas.</p>
+                        <a href="{{ url_for('view_product') }}" class="btn btn-primary">
+                            <i class="bi bi-eye me-1"></i> View Product Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row mb-4">
+                <div class="col-md-7">
+                    <div class="pe-md-4">
+                        <h5 class="mb-3 text-primary">Start Your B2B Outreach Journey</h5>
+                        <p>Upload your product or service description to begin. Our AI will analyze your content to identify your ideal target companies and decision-makers.</p>
+                        
+                        <form action="{{ url_for('upload_product') }}" method="post" enctype="multipart/form-data" class="mt-4">
+                            <div class="mb-4">
+                                <label for="product_description" class="form-label fw-bold">Upload your product description</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="product_description" name="product_description" accept=".pdf,.docx,.doc,.txt" required>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-1"></i> Upload
+                                    </button>
+                                </div>
+                                <div class="form-text">Supported formats: PDF, DOCX, DOC, or TXT</div>
+                            </div>
+                        </form>
+                        
+                        <div class="alert alert-info mt-4">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-info-circle-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6>What happens next?</h6>
+                                    <p class="mb-0">After uploading, iClout will analyze your description to identify your target industries, company sizes, and decision-maker roles to generate effective search parameters for LinkedIn.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="card h-100 border-0 bg-light">
+                        <div class="card-body">
+                            <h5 class="mb-3 text-primary">Why Use iClout?</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 d-flex">
+                                    <i class="bi bi-graph-up-arrow text-primary me-3 fs-4"></i>
+                                    <div>
+                                        <h6>Increase Connection Rate</h6>
+                                        <p class="text-muted small">Boost your LinkedIn outreach success by leveraging warm introductions.</p>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex">
+                                    <i class="bi bi-people-fill text-primary me-3 fs-4"></i>
+                                    <div>
+                                        <h6>Trusted Network Focus</h6>
+                                        <p class="text-muted small">Prioritize your most reliable connections for high-quality introductions.</p>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex">
+                                    <i class="bi bi-robot text-primary me-3 fs-4"></i>
+                                    <div>
+                                        <h6>AI-Generated Messages</h6>
+                                        <p class="text-muted small">Create personalized outreach based on your product and connection paths.</p>
+                                    </div>
+                                </li>
+                                <li class="d-flex">
+                                    <i class="bi bi-speedometer2 text-primary me-3 fs-4"></i>
+                                    <div>
+                                        <h6>Save Time & Effort</h6>
+                                        <p class="text-muted small">Automate your prospecting workflow while maintaining a personal touch.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="bi bi-layers me-2"></i>How iClout Works</h4>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center p-3 h-100 bg-light rounded">
+                    <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-upload fs-2"></i>
+                    </div>
+                    <h5 class="text-primary">1. Upload Product</h5>
+                    <p class="text-muted">Upload your product description for AI-powered analysis of your ideal customer profile.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3 h-100 bg-light rounded">
+                    <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-people fs-2"></i>
+                    </div>
+                    <h5 class="text-primary">2. Define Network</h5>
+                    <p class="text-muted">Identify your most trusted connections to establish warm introduction paths.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3 h-100 bg-light rounded">
+                    <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-search fs-2"></i>
+                    </div>
+                    <h5 class="text-primary">3. Find Prospects</h5>
+                    <p class="text-muted">Discover the warmest introduction paths to decision-makers at target companies.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center p-3 h-100 bg-light rounded">
+                    <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-chat-text fs-2"></i>
+                    </div>
+                    <h5 class="text-primary">4. Connect & Convert</h5>
+                    <p class="text-muted">Generate personalized messages that leverage your network connections.</p>
+                </div>
+            </div>
+        </div>
+        
+        {% if not product_uploaded %}
+        <div class="text-center mt-4">
+            <a href="#product_description" class="btn btn-primary">
+                <i class="bi bi-arrow-up-circle me-1"></i> Get Started Now
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

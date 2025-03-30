@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Outreach Dashboard</h4>
+        <a href="{{ url_for('search_form') }}" class="btn btn-outline-primary">New Search</a>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <p>This dashboard shows all your approved outreach messages. From here, you can copy messages to send via LinkedIn.</p>
+        </div>
+        
+        {% if messages %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Prospect</th>
+                            <th>Message Type</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Message</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if message.profile.profile_image %}
+                                    <div class="rounded-circle bg-light overflow-hidden me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <img src="{{ message.profile.profile_image }}" alt="{{ message.profile.name }}" class="img-fluid w-100 h-100 object-fit-cover">
+                                    </div>
+                                    {% else %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-person-fill text-secondary fs-5"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ message.profile.name }}</strong><br>
+                                        <small class="text-muted">{{ message.profile.headline }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if 'type' in message %}
+                                    <span class="badge 
+                                          {% if message.type == 'intro_request' %}bg-success
+                                          {% elif message.type == 'direct_existing' %}bg-info
+                                          {% else %}bg-warning{% endif %}">
+                                          {{ message.type|replace('_', ' ')|title }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Standard</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                      {% if message.status == 'approve' %}bg-success
+                                      {% elif message.status == 'edit' %}bg-info
+                                      {% else %}bg-warning{% endif %}">
+                                      {{ message.status|title }}</span>
+                            </td>
+                            <td>
+                                <small>{{ message.timestamp }}</small>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-secondary view-message" 
+                                        data-bs-toggle="modal" data-bs-target="#messageModal"
+                                        data-message="{{ message.message }}">
+                                    View
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary copy-message" 
+                                        data-message="{{ message.message }}">
+                                    Copy
+                                </button>
+                                <a href="{{ message.profile.profile_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    LinkedIn
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Message Modal -->
+            <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Outreach Message</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="modalMessageText"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="modalCopyButton">Copy Message</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <p>No approved messages yet. Search for prospects and create outreach messages to see them here.</p>
+                <a href="{{ url_for('search_form') }}" class="btn btn-primary">Start Searching</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View message modal
+        document.querySelectorAll('.view-message').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const message = this.getAttribute('data-message');
+                document.getElementById('modalMessageText').textContent = message;
+            });
+        });
+        
+        // Copy message to clipboard
+        document.querySelectorAll('.copy-message').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const message = this.getAttribute('data-message');
+                navigator.clipboard.writeText(message).then(function() {
+                    // Change button text temporarily
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(function() {
+                        button.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        });
+        
+        // Modal copy button
+        document.getElementById('modalCopyButton').addEventListener('click', function() {
+            const message = document.getElementById('modalMessageText').textContent;
+            navigator.clipboard.writeText(message).then(function() {
+                // Change button text temporarily
+                const button = document.getElementById('modalCopyButton');
+                button.textContent = 'Copied!';
+                setTimeout(function() {
+                    button.textContent = 'Copy Message';
+                }, 2000);
+            });
+        });
+    });
+</script>
+{% endblock %}

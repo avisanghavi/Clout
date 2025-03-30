@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Manage Your Trusted Network List (TNL)</h4>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <p>Your Trusted Network List (TNL) is a group of your most trusted LinkedIn connections who you can rely on for warm introductions. iClout will prioritize leads that can be reached through these trusted contacts.</p>
+        </div>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">Upload CSV</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab">Manual Entry</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="current-tab" data-bs-toggle="tab" data-bs-target="#current" type="button" role="tab">Current TNL ({{ trusted_network|length }})</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="myTabContent">
+            <!-- Upload CSV Tab -->
+            <div class="tab-pane fade show active" id="upload" role="tabpanel">
+                <form action="{{ url_for('trusted_network') }}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="tnl_file" class="form-label">Upload Trusted Network CSV</label>
+                        <input type="file" class="form-control" id="tnl_file" name="tnl_file" accept=".csv" required>
+                        <div class="form-text">
+                            CSV should have columns: "name" (required), "trust_score" (1-10, optional), "notes" (optional)
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>CSV Format Example:</h6>
+                        <pre class="bg-light p-2 rounded">name,trust_score,notes
+Jane Smith,10,Former colleague at Acme Corp
+John Doe,8,College friend
+Michael Johnson,7,Industry contact</pre>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Upload TNL</button>
+                </form>
+            </div>
+            
+            <!-- Manual Entry Tab -->
+            <div class="tab-pane fade" id="manual" role="tabpanel">
+                <form action="{{ url_for('trusted_network') }}" method="post" id="manualForm">
+                    <div class="mb-3">
+                        <div id="tnl-entries">
+                            {% if trusted_network %}
+                                {% for contact in trusted_network %}
+                                <div class="row mb-2 tnl-entry">
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control tnl-name" placeholder="Contact Name" value="{{ contact.name }}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" class="form-control tnl-score" placeholder="Trust (1-10)" min="1" max="10" value="{{ contact.trust_score }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control tnl-notes" placeholder="Notes" value="{{ contact.notes }}">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-entry"><i class="bi bi-x"></i>×</button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="row mb-2 tnl-entry">
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control tnl-name" placeholder="Contact Name">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" class="form-control tnl-score" placeholder="Trust (1-10)" min="1" max="10" value="5">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control tnl-notes" placeholder="Notes">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-entry"><i class="bi bi-x"></i>×</button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="add-entry">+ Add Contact</button>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="manual_tnl" id="manual-tnl-json" value="">
+                    <button type="submit" class="btn btn-primary" id="save-manual">Save TNL</button>
+                </form>
+            </div>
+            
+            <!-- Current TNL Tab -->
+            <div class="tab-pane fade" id="current" role="tabpanel">
+                {% if trusted_network %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Trust Score</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contact in trusted_network %}
+                                <tr>
+                                    <td>{{ contact.name }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ contact.trust_score * 10 }}%;" 
+                                                aria-valuenow="{{ contact.trust_score }}" aria-valuemin="0" aria-valuemax="10">
+                                                {{ contact.trust_score }}/10
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ contact.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <p>No trusted contacts added yet. Please use the Upload or Manual Entry tabs to add your trusted network.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('search_form') }}" class="btn btn-primary">Continue to Search</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add new entry
+        document.getElementById('add-entry').addEventListener('click', function() {
+            const entriesContainer = document.getElementById('tnl-entries');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'row mb-2 tnl-entry';
+            newEntry.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control tnl-name" placeholder="Contact Name">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control tnl-score" placeholder="Trust (1-10)" min="1" max="10" value="5">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control tnl-notes" placeholder="Notes">
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-entry"><i class="bi bi-x"></i>×</button>
+                </div>
+            `;
+            entriesContainer.appendChild(newEntry);
+            
+            // Add event listener to the new remove button
+            const newRemoveButton = newEntry.querySelector('.remove-entry');
+            newRemoveButton.addEventListener('click', function() {
+                newEntry.remove();
+            });
+        });
+        
+        // Remove entry event delegation
+        document.getElementById('tnl-entries').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-entry') || e.target.parentElement.classList.contains('remove-entry')) {
+                const entry = e.target.closest('.tnl-entry');
+                if (entry) {
+                    entry.remove();
+                }
+            }
+        });
+        
+        // Form submission
+        document.getElementById('manualForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect all entries
+            const entries = [];
+            document.querySelectorAll('.tnl-entry').forEach(function(entry) {
+                const name = entry.querySelector('.tnl-name').value.trim();
+                if (name) {  // Only include entries with a name
+                    entries.push({
+                        name: name,
+                        trust_score: parseInt(entry.querySelector('.tnl-score').value) || 5,
+                        notes: entry.querySelector('.tnl-notes').value.trim()
+                    });
+                }
+            });
+            
+            // Set the JSON in the hidden field
+            document.getElementById('manual-tnl-json').value = JSON.stringify(entries);
+            
+            // Submit the form
+            this.submit();
+        });
+    });
+</script>
+{% endblock %}

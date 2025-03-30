@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iClout - B2B Sales Networking Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-linkedin text-primary"></i>iClout
+                <span class="ms-2 fs-6 text-muted fw-normal">B2B Sales Assistant</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">
+                            <i class="bi bi-house-door me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'define_icp' }}" href="{{ url_for('define_icp') }}">
+                            <i class="bi bi-bullseye me-1"></i> ICP
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'trusted_network' }}" href="{{ url_for('trusted_network') }}">
+                            <i class="bi bi-people me-1"></i> Network
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'search_form' }}" href="{{ url_for('search_form') }}">
+                            <i class="bi bi-search me-1"></i> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'results' }}" href="{{ url_for('results') }}">
+                            <i class="bi bi-list-check me-1"></i> CSILL
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-graph-up me-1"></i> Dashboard
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash messages -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show mb-4">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            {% elif category == 'error' or category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                            {% endif %}
+                            {{ message }}
+
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" title="Close alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Step indicator - more elegant-->
+        <div class="step-indicator mb-4">
+            <div class="step {% if request.endpoint == 'index' or request.endpoint == 'view_product' %}active{% elif request.endpoint in ['define_icp', 'trusted_network', 'search_form', 'results', 'message_form', 'message_review'] %}completed{% endif %}">
+                <div class="step-number">
+                    {% if request.endpoint in ['define_icp', 'trusted_network', 'search_form', 'results', 'message_form', 'message_review'] %}
+                        <i class="bi bi-check-lg"></i>
+                    {% else %}1{% endif %}
+                </div>
+                <div>Product</div>
+            </div>
+            <div class="step {% if request.endpoint == 'define_icp' %}active{% elif request.endpoint in ['trusted_network', 'search_form', 'results', 'message_form', 'message_review'] %}completed{% endif %}">
+                <div class="step-number">
+                    {% if request.endpoint in ['trusted_network', 'search_form', 'results', 'message_form', 'message_review'] %}
+                        <i class="bi bi-check-lg"></i>
+                    {% else %}2{% endif %}
+                </div>
+                <div>ICP</div>
+            </div>
+            <div class="step {% if request.endpoint == 'trusted_network' %}active{% elif request.endpoint in ['search_form', 'results', 'message_form', 'message_review'] %}completed{% endif %}">
+                <div class="step-number">
+                    {% if request.endpoint in ['search_form', 'results', 'message_form', 'message_review'] %}
+                        <i class="bi bi-check-lg"></i>
+                    {% else %}3{% endif %}
+                </div>
+                <div>Network</div>
+            </div>
+            <div class="step {% if request.endpoint == 'search_form' %}active{% elif request.endpoint in ['results', 'message_form', 'message_review'] %}completed{% endif %}">
+                <div class="step-number">
+                    {% if request.endpoint in ['results', 'message_form', 'message_review'] %}
+                        <i class="bi bi-check-lg"></i>
+                    {% else %}4{% endif %}
+                </div>
+                <div>Search</div>
+            </div>
+            <div class="step {% if request.endpoint == 'results' %}active{% elif request.endpoint in ['message_form', 'message_review'] %}completed{% endif %}">
+                <div class="step-number">
+                    {% if request.endpoint in ['message_form', 'message_review'] %}
+                        <i class="bi bi-check-lg"></i>
+                    {% else %}5{% endif %}
+                </div>
+                <div>CSILL</div>
+            </div>
+            <div class="step {% if request.endpoint == 'message_form' or request.endpoint == 'message_review' %}active{% endif %}">
+                <div class="step-number">6</div>
+                <div class="step-number">6</div>
+                <div>Outreach</div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        {% block content %}{% endblock %}
+        
+        <!-- Footer -->
+        <footer class="mt-5 text-center text-muted">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <p class="mb-1">
+                            <i class="bi bi-linkedin text-primary me-1"></i> 
+
+                            <span class="fw-bold">iClout</span> © 2025
+                        </p>
+                        <p class="small mb-0">B2B Sales Networking Assistant</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+</body>
+</html>

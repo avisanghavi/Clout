@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="mb-0">Review Your Outreach Message</h4>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="profile-image mb-3 text-center">
+                            {% if profile.profile_image %}
+                            <div class="rounded-circle bg-light overflow-hidden mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <img src="{{ profile.profile_image }}" alt="{{ profile.name }}" class="img-fluid w-100 h-100 object-fit-cover">
+                            </div>
+                            {% else %}
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title text-center mb-1">{{ profile.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted text-center">{{ profile.headline }}</h6>
+                        <p class="text-muted small text-center">{{ profile.location }}</p>
+                        <div class="text-center mt-2">
+                            <span class="badge connection-badge 
+                                  {% if profile.tnl_connection %}tnl-badge
+                                  {% elif profile.connection_level == '1st' %}first-badge
+                                  {% elif profile.connection_level == '2nd' %}second-badge
+                                  {% else %}cold-badge{% endif %}">
+                                {% if profile.tnl_connection %}TNL Connection
+                                {% else %}{{ profile.connection_level }} Connection{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title d-flex align-items-center">
+                            <i class="bi bi-chat-text me-2 text-primary"></i>
+                            Character Count: <span id="char-count" class="ms-2 badge bg-primary">0</span>/300
+                        </h6>
+                        <div class="progress">
+                            <div id="char-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p class="mt-2 small text-muted">LinkedIn limits connection messages to 300 characters</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Message Type: <span class="badge 
+                              {% if message_type == 'intro_request' %}bg-success
+                              {% elif message_type == 'direct_existing' %}bg-info
+                              {% else %}bg-warning{% endif %}">
+                              {{ message_type|replace('_', ' ')|title }}</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0"><strong>Recipient:</strong> {{ recipient }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-envelope-check me-2"></i>Generated Message</h5>
+                    </div>
+                    <div class="card-body bg-light">
+                        <p id="message-text" class="message-preview p-4 bg-white border rounded">{{ message }}</p>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('approve_message') }}" method="post">
+                    <input type="hidden" name="profile_id" value="{{ profile_id }}">
+                    <input type="hidden" name="message" value="{{ message }}">
+                    
+                    <div class="mb-4">
+                        <label for="edited_message" class="form-label fw-bold">Edit Message (if needed)</label>
+                        <textarea class="form-control" id="edited_message" name="edited_message" rows="5">{{ message }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="approve" class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i> Approve & Queue
+                        </button>
+                        <button type="submit" name="action" value="edit" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i> Save Edits
+                        </button>
+                        <button type="submit" name="action" value="reject" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle me-1"></i> Reject
+                        </button>
+                        <button type="button" id="copy-button" class="btn btn-outline-primary ms-auto" onclick="copyMessageToClipboard()">
+                            <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character counter
+    function updateCharCount() {
+        const message = document.getElementById('edited_message').value;
+        const count = message.length;
+        const countElement = document.getElementById('char-count');
+        const progressBar = document.getElementById('char-progress');
+        
+        countElement.textContent = count;
+        
+        // Update progress bar
+        const percentage = Math.min((count / 300) * 100, 100);
+        progressBar.style.width = percentage + '%';
+        
+        // Change color based on character count
+        if (count <= 200) {
+            progressBar.className = 'progress-bar bg-success';
+            countElement.className = 'ms-2 badge bg-success';
+        } else if (count <= 300) {
+            progressBar.className = 'progress-bar bg-warning';
+            countElement.className = 'ms-2 badge bg-warning';
+        } else {
+            progressBar.className = 'progress-bar bg-danger';
+            countElement.className = 'ms-2 badge bg-danger';
+        }
+    }
+    
+    // Copy to clipboard functionality
+    function copyMessageToClipboard() {
+        const messageText = document.getElementById('edited_message').value;
+        navigator.clipboard.writeText(messageText)
+            .then(() => {
+                // Show success message
+                const button = document.getElementById('copy-button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check-circle me-1"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy message. Please try again.');
+            });
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCharCount();
+        document.getElementById('edited_message').addEventListener('input', updateCharCount);
+    });
+</script>
+{% endblock %}
